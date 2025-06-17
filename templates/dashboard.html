@@ -1,0 +1,982 @@
+{% extends 'base.html' %}
+
+{% block title %}Developer Dashboard - DevX Tracker{% endblock %}
+
+{% block head %}
+{{ super() }}
+<script>
+    console.log('Dashboard HTML file script initiated!'); // Very early log
+</script>
+<style>
+.profile-image {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #007bff;
+    object-fit: cover;
+    margin-right: 10px;
+}
+
+.play-audio {
+    display: none;
+}
+
+.recommendation-card {
+    transition: all 0.3s ease;
+    border: 1px solid #dee2e6;
+}
+
+.recommendation-card:hover {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <!-- Main Panels Row -->
+<div class="row">
+    <!-- Left Panel: GitLab Metrics -->
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <img src="{{ url_for('static', filename='img/' + current_user.photo) }}" alt="Developer Profile" class="profile-image">
+                <h5 class="mb-0">
+                    <i class="fab fa-gitlab me-2 text-primary"></i>GitLab Metrics
+                </h5>
+                    </div>
+                <span class="badge bg-success">Live</span>
+            </div>
+            <div class="card-body">
+                <!-- Key Metrics Cards -->
+                <div class="row mb-4">
+                    <div class="col-6">
+                        <div class="metric-card text-center p-3 bg-primary bg-opacity-10 rounded">
+                            <div class="metric-value text-primary">{{ gitlab_metrics.commits_this_week }}</div>
+                            <div class="metric-label">Commits This Week</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="metric-card text-center p-3 bg-success bg-opacity-10 rounded">
+                            <div class="metric-value text-success">{{ gitlab_metrics.merge_requests_merged }}</div>
+                            <div class="metric-label">MRs Merged</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Productivity Score -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-medium">Productivity Score</span>
+                        <span class="badge bg-primary">{{ gitlab_metrics.productivity_score }}/10</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar" style="width: {{ gitlab_metrics.productivity_score * 10 }}%"></div>
+                    </div>
+                </div>
+                
+                <!-- Collaboration Score -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-medium">Collaboration Score</span>
+                        <span class="badge bg-info">{{ gitlab_metrics.collaboration_score }}/10</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-info" style="width: {{ gitlab_metrics.collaboration_score * 10 }}%"></div>
+                    </div>
+                </div>
+                
+                <!-- Pipeline Success Rate -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-medium">Pipeline Success</span>
+                        <span class="badge bg-success">{{ (gitlab_metrics.pipeline_success_rate * 100)|round(1) }}%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-success" style="width: {{ gitlab_metrics.pipeline_success_rate * 100 }}%"></div>
+                    </div>
+                </div>
+                
+                <!-- Weekly Contribution Chart -->
+                <div class="mb-4">
+                    <h6 class="fw-medium mb-2">Weekly Contribution Trend</h6>
+                    <div class="chart-container small-chart">
+                        <canvas id="weeklyChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- GitLab Projects -->
+                <div class="mb-4">
+                    <h6 class="fw-medium mb-3">Active Projects</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm gitlab-table">
+                            <thead>
+                                <tr>
+                                    <th>Project</th>
+                                    <th>Stars</th>
+                                    <th>Last Activity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for project in gitlab_metrics.get('gitlab_projects', [])[:3] %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-medium">{{ project.name }}</div>
+                                        <small class="text-muted">{{ project.description[:40] }}...</small>
+                                    </td>
+                                    <td><span class="badge bg-secondary">{{ project.stars }}</span></td>
+                                    <td><small>{{ project.last_activity }}</small></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- GitLab Issues & MRs -->
+                <div class="mb-4">
+                    <h6 class="fw-medium mb-3">Open Issues & MRs</h6>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="text-center p-2 bg-warning bg-opacity-10 rounded">
+                                <div class="fw-bold text-warning">{{ gitlab_metrics.get('issues_assigned', 0) }}</div>
+                                <small class="text-muted">Issues</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center p-2 bg-info bg-opacity-10 rounded">
+                                <div class="fw-bold text-info">{{ gitlab_metrics.get('merge_requests_open', 0) }}</div>
+                                <small class="text-muted">Open MRs</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activity -->
+                <div>
+                    <h6 class="fw-medium mb-3">Recent Activity</h6>
+                    <div class="activity-list">
+                        {% for activity in gitlab_metrics.recent_activity[:3] %}
+                        <div class="activity-item d-flex align-items-start mb-2">
+                            <div class="activity-icon me-2">
+                                {% if activity.type == 'commit' %}
+                                <i class="fas fa-code-branch text-primary"></i>
+                                {% elif activity.type == 'merge_request' %}
+                                <i class="fas fa-code-merge text-success"></i>
+                                {% elif activity.type == 'issue' %}
+                                <i class="fas fa-bug text-warning"></i>
+                                {% else %}
+                                <i class="fas fa-eye text-info"></i>
+                                {% endif %}
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-text small">{{ activity.action }}</div>
+                                <div class="activity-time text-muted small">{{ activity.timestamp }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Middle Panel: AI Recommendations -->
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+                <div class="card-header d-flex align-items-center">
+                    <img src="{{ url_for('static', filename='img/' + current_user.photo) }}" alt="Developer Profile" class="profile-image">
+                    <h5 class="mb-0 flex-grow-1">
+                    <i class="fas fa-brain me-2 text-info"></i>AI Recommendations
+                </h5>
+                    <!-- Webcam Button -->
+                    <button class="btn btn-sm btn-outline-secondary me-2" data-bs-toggle="modal" data-bs-target="#webcamModal">
+                        <i class="fas fa-camera"></i> Webcam Analyze
+                    </button>
+                    <!-- ADK Button -->
+                    <button class="btn btn-sm btn-info adk-insights" onclick="getADKInsights('{{ user_id }}')">
+                        <i class="fas fa-robot"></i> ADK Insights
+                    </button>
+            </div>
+            <div class="card-body">
+                    <!-- Productivity Insights -->
+                    <div class="mb-4">
+                        <h6 class="text-primary mb-3">Productivity Insights</h6>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <div class="text-center p-2 bg-primary bg-opacity-10 rounded">
+                                    <div class="fw-bold text-primary">{{ productivity_insights.get('productivity_score', 0) }}/10</div>
+                                    <small class="text-muted">Productivity</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center p-2 bg-info bg-opacity-10 rounded">
+                                    <div class="fw-bold text-info">{{ productivity_insights.get('collaboration_score', 0) }}/10</div>
+                                    <small class="text-muted">Collaboration</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6 class="small text-success mb-2">Strengths</h6>
+                            <ul class="list-unstyled mb-0">
+                                {% for strength in productivity_insights.get('strengths', []) %}
+                                <li class="small mb-1"><i class="fas fa-check-circle me-2 text-success"></i>{{ strength }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6 class="small text-warning mb-2">Areas for Improvement</h6>
+                            <ul class="list-unstyled mb-0">
+                                {% for area in productivity_insights.get('areas_for_improvement', []) %}
+                                <li class="small mb-1"><i class="fas fa-exclamation-circle me-2 text-warning"></i>{{ area }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Recommendations -->
+                    <div class="recommendations-list">
+                        {% for rec in recommendations %}
+                        <div class="recommendation-card mb-3 p-3 border rounded">
+                            <div class="d-flex align-items-start">
+                        <div class="recommendation-content flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">{{ rec.title }}</h6>
+                            </div>
+                            <p class="mb-2 small text-muted">{{ rec.description }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Weekly Goals -->
+                    {% if weekly_goals %}
+                    <div class="mb-4">
+                        <h6 class="text-primary mb-3">Weekly Goals</h6>
+                        {% for goal in weekly_goals %}
+                        <div class="goal-card mb-3 p-3 bg-primary bg-opacity-10 rounded">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">{{ goal.get('goal', '') }}</h6>
+                                    <div class="small text-muted">{{ goal.get('metric', '') }}</div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="fs-4 fw-bold text-primary">Target: {{ goal.get('target', '0') }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Skill Development -->
+                    {% if skill_development %}
+                    <div>
+                        <h6 class="text-primary mb-3">Skill Development</h6>
+                        <div class="p-3 bg-primary bg-opacity-10 rounded">
+                            <div class="mb-3">
+                                <h6 class="small text-primary mb-2">Current Level: {{ skill_development.get('current_level', 'beginner')|title }}</h6>
+                            </div>
+                            <div class="mb-3">
+                                <h6 class="small text-primary mb-2">Focus Areas:</h6>
+                                <ul class="list-unstyled mb-0">
+                                    {% for skill in skill_development.get('recommended_focus', []) %}
+                                    <li class="small mb-1"><i class="fas fa-star me-2 text-warning"></i>{{ skill }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <div>
+                                <h6 class="small text-primary mb-2">Learning Resources:</h6>
+                                <ul class="list-unstyled mb-0">
+                                    {% for resource in skill_development.get('learning_resources', []) %}
+                                    <li class="small mb-1"><i class="fas fa-book me-2 text-info"></i>{{ resource }}</li>
+                                    {% endfor %}
+                    </ul>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Panel: Gamification -->
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+                <div class="card-header d-flex align-items-center">
+                    <img src="{{ url_for('static', filename='img/' + current_user.photo) }}" alt="Developer Profile" class="profile-image">
+                <h5 class="mb-0">
+                    <i class="fas fa-trophy me-2 text-warning"></i>Achievements & Progress
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- Level and Points -->
+                <div class="text-center mb-4">
+                    <div class="level-circle mx-auto mb-2">
+                        <span class="level-number">{{ achievements.level }}</span>
+                    </div>
+                    <h6 class="mb-1">Level {{ achievements.level }} Developer</h6>
+                    <div class="text-muted small">{{ achievements.total_points }} total points</div>
+                    <div class="progress mt-2" style="height: 6px;">
+                        <div class="progress-bar bg-warning" style="width: {{ ((achievements.total_points % 500) / 500 * 100)|round(1) }}%"></div>
+                    </div>
+                    <div class="small text-muted mt-1">{{ ((achievements.next_level_points - achievements.total_points) if achievements.level < 10 else 0) }} points to next level</div>
+                </div>
+                
+                <!-- Weekly Points -->
+                <div class="mb-4 p-3 bg-warning bg-opacity-10 rounded">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-warning mb-1">This Week</h6>
+                            <div class="small text-muted">Points earned</div>
+                        </div>
+                        <div class="text-end">
+                            <div class="fs-4 fw-bold text-warning">+{{ achievements.weekly_points }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Achievements Grid -->
+                <div class="achievements-grid">
+                    <h6 class="mb-3">Recent Achievements</h6>
+                    {% for achievement in achievements.achievements[:6] %}
+                    <div class="achievement-item d-flex align-items-center mb-2 p-2 rounded {% if achievement.earned %}bg-success bg-opacity-10{% else %}bg-secondary bg-opacity-10{% endif %}">
+                        <div class="achievement-icon me-3">
+                            <i class="{{ achievement.icon }} {% if achievement.earned %}text-success{% else %}text-muted{% endif %}"></i>
+                        </div>
+                        <div class="achievement-content flex-grow-1">
+                            <div class="achievement-name small fw-medium {% if not achievement.earned %}text-muted{% endif %}">
+                                {{ achievement.name }}
+                            </div>
+                            <div class="achievement-desc small text-muted">{{ achievement.description }}</div>
+                        </div>
+                        <div class="achievement-points small {% if achievement.earned %}text-success{% else %}text-muted{% endif %}">
+                            +{{ achievement.points }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Language Breakdown -->
+                <div class="mt-4">
+                    <h6 class="mb-3">Language Breakdown</h6>
+                    <canvas id="languageChart" height="80"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Stats Row -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Detailed Analytics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="stat-item text-center p-3">
+                            <div class="stat-value text-primary">{{ gitlab_metrics.lines_of_code }}</div>
+                            <div class="stat-label">Lines of Code</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-item text-center p-3">
+                            <div class="stat-value text-success">{{ gitlab_metrics.issues_closed }}</div>
+                            <div class="stat-label">Issues Closed</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-item text-center p-3">
+                            <div class="stat-value text-info">{{ gitlab_metrics.avg_merge_time_hours }}h</div>
+                            <div class="stat-label">Avg Merge Time</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-item text-center p-3">
+                            <div class="stat-value text-warning">{{ (gitlab_metrics.code_review_participation * 100)|round(1) }}%</div>
+                            <div class="stat-label">Review Participation</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Historical Data Row -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Historical Activity (Last 3 Months)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs mb-3" id="historicalTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="commits-tab" data-bs-toggle="tab" data-bs-target="#commits" type="button" role="tab">
+                                <i class="fas fa-code-branch me-2"></i>Commits
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="merge-requests-tab" data-bs-toggle="tab" data-bs-target="#merge-requests" type="button" role="tab">
+                                <i class="fas fa-code-merge me-2"></i>Merge Requests
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="issues-tab" data-bs-toggle="tab" data-bs-target="#issues" type="button" role="tab">
+                                <i class="fas fa-bug me-2"></i>Issues
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content" id="historicalTabsContent">
+                        <!-- Commits Tab -->
+                        <div class="tab-pane fade show active" id="commits" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Title</th>
+                                            <th>State</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for commit in gitlab_metrics.historical_data.commits %}
+                                        <tr>
+                                            <td>{{ commit.created_at }}</td>
+                                            <td>{{ commit.title }}</td>
+                                            <td>
+                                                <span class="badge bg-success">Completed</span>
+                                            </td>
+                                            <td>
+                                                <a href="{{ commit.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-external-link-alt"></i> View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Merge Requests Tab -->
+                        <div class="tab-pane fade" id="merge-requests" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Title</th>
+                                            <th>State</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for mr in gitlab_metrics.historical_data.merge_requests %}
+                                        <tr>
+                                            <td>{{ mr.created_at }}</td>
+                                            <td>{{ mr.title }}</td>
+                                            <td>
+                                                <span class="badge bg-{% if mr.state == 'merged' %}success{% elif mr.state == 'opened' %}warning{% else %}secondary{% endif %}">
+                                                    {{ mr.state|title }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="{{ mr.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-external-link-alt"></i> View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Issues Tab -->
+                        <div class="tab-pane fade" id="issues" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Title</th>
+                                            <th>State</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for issue in gitlab_metrics.historical_data.issues %}
+                                        <tr>
+                                            <td>{{ issue.created_at }}</td>
+                                            <td>{{ issue.title }}</td>
+                                            <td>
+                                                <span class="badge bg-{% if issue.state == 'closed' %}success{% elif issue.state == 'opened' %}warning{% else %}secondary{% endif %}">
+                                                    {{ issue.state|title }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="{{ issue.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-external-link-alt"></i> View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Audio Player and Webcam Modal (Moved to correct location) -->
+<!-- <audio id="audioPlayer" style="display: none;"></audio> -->
+
+<div class="modal fade" id="webcamModal" tabindex="-1" aria-labelledby="webcamModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="webcamModalLabel">Image Analysis with Gemini AI</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <h6>Webcam Feed:</h6>
+                <img id="webcamFeed" src="{{ url_for('static', filename='img/6.jpg') }}" class="img-fluid rounded border mb-3" alt="Webcam Feed" style="max-width: 100%; height: auto; max-height: 400px; object-fit: contain;">
+                <button id="analyzeImageBtn" class="btn btn-primary mb-3">Analyze Image</button>
+                <div id="loadingIndicator" class="spinner-border text-primary" role="status" style="display: none;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div id="geminiResponse" class="mt-3 text-start">
+                    <h6 class="text-primary mb-3">Wellness Analysis & Recommendations</h6>
+                    <div class="response-content bg-dark p-4 rounded text-light" style="max-height: 400px; overflow-y: auto;">
+                        <div class="analysis-section mb-4">
+                            <h6 class="text-success mb-2"><i class="fas fa-heart-pulse me-2"></i>Situation Analysis</h6>
+                            <div class="analysis-text small text-white"></div>
+                        </div>
+                        <div class="immediate-actions mb-4">
+                            <h6 class="text-warning mb-2"><i class="fas fa-bolt me-2"></i>Immediate Actions</h6>
+                            <ul class="action-list list-unstyled small text-white"></ul>
+                        </div>
+                        <div class="long-term-strategies">
+                            <h6 class="text-info mb-2"><i class="fas fa-chart-line me-2"></i>Long-term Strategies</h6>
+                            <ul class="strategy-list list-unstyled small text-white"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Insights Modal -->
+<div class="modal fade" id="insightsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">ADK Insights</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="insightsContent"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+
+{# 1. Load charts.js first #}
+{# <script src="{{ url_for('static', filename='js/charts.js') }}"></script> #}
+<script>
+    console.log('charts.js should be loaded by base.html or another script.');
+    console.log('Type of Chart object:', typeof Chart); // Verify Chart.js loading
+</script>
+
+{# 2. Define global data variables and playAudio function #}
+<script>
+    window.weeklyContributionData = {{ gitlab_metrics.weekly_contribution_trend|tojson }};
+    window.languageBreakdownData = {{ gitlab_metrics.language_breakdown|tojson }};
+
+    function getADKInsights(userId) {
+        // Show loading state
+        const button = event.currentTarget;
+        const originalIcon = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ADK Insights';
+        button.disabled = true;
+
+        // Fetch ADK insights
+        fetch(`/api/adk_insights/${userId}`)
+            .then(response => response.json())
+            .then(data => {
+                // Create modal to display insights
+                const modal = new bootstrap.Modal(document.getElementById('insightsModal'));
+                const insightsContent = document.getElementById('insightsContent');
+                
+                // Format the insights with better styling
+                insightsContent.innerHTML = `
+                    <div class="insights-container">
+                        <div class="timestamp text-muted mb-3">
+                            <small>Generated: ${new Date(data.timestamp).toLocaleString()}</small>
+                        </div>
+                        <div class="insights-text">
+                            ${data.insights.split('\n').map(line => {
+                                if (line.startsWith('#')) {
+                                    return `<h5 class="mt-4 mb-3">${line.replace('#', '').trim()}</h5>`;
+                                } else if (line.trim()) {
+                                    return `<p class="mb-2">${line}</p>`;
+                                }
+                                return '';
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+                
+                modal.show();
+            })
+            .catch(error => {
+                console.error('Error fetching ADK insights:', error);
+                alert('Failed to fetch insights. Please try again.');
+            })
+            .finally(() => {
+                // Restore button state
+                button.innerHTML = originalIcon;
+                button.disabled = false;
+            });
+    }
+</script>
+
+{# 3. Consolidated DOMContentLoaded Listener for all dashboard-specific JavaScript (inlined dashboard.js content) #}
+<script>
+// --- Dashboard JavaScript Logic (Consolidated) ---
+
+// Function Definitions (These functions were originally in dashboard.js)
+function initWeeklyChart(data) {
+    const ctx = document.getElementById('weeklyChart');
+    if (!ctx) {
+        console.warn('Canvas element for weeklyChart not found.');
+        return;
+    }
+    
+    // Set explicit canvas dimensions (moved from original dashboard.js to here)
+    ctx.style.width = '100%';
+    ctx.style.height = '200px';
+    ctx.width = ctx.offsetWidth;
+    ctx.height = 200;
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'Commits',
+                data: data,
+                backgroundColor: 'rgba(14, 165, 233, 0.2)',
+                borderColor: 'rgba(14, 165, 233, 1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 3,
+                pointHoverRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            aspectRatio: false,
+            interaction: { intersect: false },
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, max: Math.max(...data) + 2, grid: { color: 'rgba(148, 163, 184, 0.1)' }, ticks: { color: '#94a3b8', font: { size: 10 }, stepSize: 1 } },
+                x: { grid: { color: 'rgba(148, 163, 184, 0.1)' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+            }
+        }
+    });
+}
+
+function initLanguageChart(data) {
+    const ctx = document.getElementById('languageChart');
+    if (!ctx) {
+        console.warn('Canvas element for languageChart not found.');
+        return;
+    }
+    // Set explicit canvas dimensions (moved from original dashboard.js to here)
+    ctx.style.width = '100%';
+    ctx.style.height = '300px';
+    ctx.width = ctx.offsetWidth;
+    ctx.height = 300;
+
+    const languages = Object.keys(data);
+    const percentages = Object.values(data);
+    const colors = ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: languages,
+            datasets: [{
+                data: percentages,
+                backgroundColor: colors.slice(0, languages.length),
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, aspectRatio: 1,
+            plugins: {
+                legend: { position: 'bottom', labels: { color: '#f8fafc', font: { size: 10 }, usePointStyle: true, pointStyle: 'circle', padding: 10 } }
+            }
+        }
+    });
+}
+
+function formatNumber(num) {
+    return num >= 1000 ? (num / 1000).toFixed(1) + 'k' : num.toString();
+}
+
+function getScoreColor(score, max = 10) {
+    const percentage = (score / max) * 100;
+    if (percentage >= 80) return '#10b981';
+    if (percentage >= 60) return '#f59e0b';
+    if (percentage >= 40) return '#f97316';
+    return '#ef4444';
+}
+
+function initTooltips() {
+    const tooltipElements = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipElements.forEach(element => {
+        new bootstrap.Tooltip(element);
+    });
+}
+
+function updateLiveMetrics() {
+    const commitElement = document.querySelector('.metric-value');
+    if (commitElement) {
+        commitElement.style.animation = 'fadeIn 0.5s ease-in';
+        setTimeout(() => { commitElement.style.animation = ''; }, 500);
+    }
+}
+
+function getADKInsights(userId) {
+    // Show loading state
+    const button = event.currentTarget;
+    const originalIcon = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ADK Insights';
+    button.disabled = true;
+
+    // Fetch ADK insights
+    fetch(`/api/adk_insights/${userId}`)
+        .then(response => response.json())
+        .then(data => {
+            // Create modal to display insights
+            const modal = new bootstrap.Modal(document.getElementById('insightsModal'));
+            const insightsContent = document.getElementById('insightsContent');
+            
+            // Format the insights with better styling
+            insightsContent.innerHTML = `
+                <div class="insights-container">
+                    <div class="timestamp text-muted mb-3">
+                        <small>Generated: ${new Date(data.timestamp).toLocaleString()}</small>
+                    </div>
+                    <div class="insights-text">
+                        ${data.insights.split('\n').map(line => {
+                            if (line.startsWith('#')) {
+                                return `<h5 class="mt-4 mb-3">${line.replace('#', '').trim()}</h5>`;
+                            } else if (line.trim()) {
+                                return `<p class="mb-2">${line}</p>`;
+                            }
+                            return '';
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+            
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Error fetching ADK insights:', error);
+            alert('Failed to fetch insights. Please try again.');
+        })
+        .finally(() => {
+            // Restore button state
+            button.innerHTML = originalIcon;
+            button.disabled = false;
+        });
+}
+
+// Main DOMContentLoaded Listener (all dashboard logic now here)
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard script loaded and DOM content loaded!');
+    
+    // Chart Initialization
+    initWeeklyChart(window.weeklyContributionData);
+    initLanguageChart(window.languageBreakdownData);
+
+    // Webcam Modal Logic
+    const analyzeImageBtn = document.getElementById('analyzeImageBtn');
+    console.log('analyzeImageBtn element:', analyzeImageBtn);
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const geminiResponseDiv = document.getElementById('geminiResponse');
+
+    if (analyzeImageBtn) {
+        analyzeImageBtn.addEventListener('click', async () => {
+            console.log('Analyze Image button clicked!');
+            analyzeImageBtn.style.display = 'none';
+            loadingIndicator.style.display = 'block';
+            
+            // Clear previous content using the new selectors
+            document.querySelector('.analysis-text').textContent = '';
+            document.querySelector('.action-list').innerHTML = '';
+            document.querySelector('.strategy-list').innerHTML = '';
+
+            try {
+                console.log('Sending request to /api/analyze_image...');
+                const response = await fetch('/api/analyze_image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        image_path: 'static/img/6.jpg', 
+                        prompt: 'This image shows an employee who appears fatigued. Please analyze the situation and provide specific, actionable suggestions for how they can improve work-life balance and prevent burnout. Include both immediate actions and long-term strategies. Please respond only in JSON format with the following keys: "situation_analysis" (string), "immediate_actions" (array of strings), and "long_term_strategies" (array of strings). Example: {"situation_analysis": "The employee shows signs of moderate fatigue due to prolonged screen time and lack of breaks.", "immediate_actions": ["Take a 5-minute break every hour", "Practice the 20-20-20 rule for eye strain"], "long_term_strategies": ["Implement a strict work-life boundary", "Engage in regular physical activity outside of work hours", "Prioritize sleep and hydration"]}' 
+                    })
+                });
+
+                console.log('Received response from API:', response);
+                const data = await response.json();
+
+                if (response.ok) {
+                    console.log('API call successful. Data:', data);
+                    if (data.response) {
+                        try {
+                            // Remove markdown code block delimiters before parsing
+                            let rawJsonResponse = data.response;
+                            if (rawJsonResponse.startsWith('```json\n')) {
+                                rawJsonResponse = rawJsonResponse.substring('```json\n'.length);
+                            }
+                            if (rawJsonResponse.endsWith('\n```')) {
+                                rawJsonResponse = rawJsonResponse.slice(0, -'\n```'.length);
+                            }
+                            
+                            const parsedResponse = JSON.parse(rawJsonResponse);
+                            document.querySelector('.analysis-text').textContent = parsedResponse.situation_analysis || 'No analysis provided.';
+                            
+                            const actionList = document.querySelector('.action-list');
+                            actionList.innerHTML = ''; // Clear previous content
+                            if (parsedResponse.immediate_actions && Array.isArray(parsedResponse.immediate_actions)) {
+                                parsedResponse.immediate_actions.forEach(item => {
+                                    const li = document.createElement('li');
+                                    li.className = 'mb-2';
+                                    li.innerHTML = `<i class="fas fa-check-circle text-warning me-2"></i>${item}`;
+                                    actionList.appendChild(li);
+                                });
+                            }
+
+                            const strategyList = document.querySelector('.strategy-list');
+                            strategyList.innerHTML = ''; // Clear previous content
+                            if (parsedResponse.long_term_strategies && Array.isArray(parsedResponse.long_term_strategies)) {
+                                parsedResponse.long_term_strategies.forEach(item => {
+                                    const li = document.createElement('li');
+                                    li.className = 'mb-2';
+                                    li.innerHTML = `<i class="fas fa-star text-info me-2"></i>${item}`;
+                                    strategyList.appendChild(li);
+                                });
+                            }
+                        } catch (jsonError) {
+                            console.error('Error parsing JSON response:', jsonError);
+                            document.querySelector('.analysis-text').textContent = 'Error parsing AI response. Please try again.';
+                            document.querySelector('.action-list').innerHTML = '';
+                            document.querySelector('.strategy-list').innerHTML = '';
+                            console.log('Raw AI Response:', data.response);
+                        }
+                    } else {
+                        document.querySelector('.analysis-text').textContent = 'No response data received.';
+                        document.querySelector('.action-list').innerHTML = '';
+                        document.querySelector('.strategy-list').innerHTML = '';
+                    }
+                } else {
+                    console.error('API Error:', data);
+                    document.querySelector('.analysis-text').textContent = 'Error: ' + (data.error || 'Unknown error');
+                    document.querySelector('.action-list').innerHTML = '';
+                    document.querySelector('.strategy-list').innerHTML = '';
+                }
+            } catch (error) {
+                console.error('Fetch Error:', error);
+                document.querySelector('.analysis-text').textContent = 'Error: Could not connect to API.';
+                document.querySelector('.action-list').innerHTML = '';
+                document.querySelector('.strategy-list').innerHTML = '';
+            } finally {
+                loadingIndicator.style.display = 'none';
+                analyzeImageBtn.style.display = 'block';
+            }
+        });
+    }
+
+    // Reset modal content when it's hidden
+    if (webcamModal) {
+        webcamModal.addEventListener('hidden.bs.modal', () => {
+            document.querySelector('.analysis-text').textContent = '';
+            document.querySelector('.action-list').innerHTML = '';
+            document.querySelector('.strategy-list').innerHTML = '';
+            if (analyzeImageBtn) analyzeImageBtn.style.display = 'block';
+            loadingIndicator.style.display = 'none';
+        });
+    }
+    
+    // Add smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+    
+    // Add hover effects to metric cards
+    document.querySelectorAll('.metric-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.05)';
+        });
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+    
+    // Add click animation to achievement items
+    document.querySelectorAll('.achievement-item').forEach(item => {
+        item.addEventListener('click', function() {
+            this.style.animation = 'pulse 0.3s ease-in-out';
+            setTimeout(() => { this.style.animation = ''; }, 300);
+        });
+    });
+    
+    // Real-time updates simulation (for demo purposes)
+    setInterval(updateLiveMetrics, 30000);
+    
+    document.querySelectorAll('.main-content, .dashboard-panel, .dashboard-grid, .telemetry-section, .admin-section')
+        .forEach(el => el.classList.add('loaded'));
+});
+</script>
+{% endblock %}

@@ -1,5 +1,3 @@
-# DevX-Tracker
-DevX Tracker is an innovative developer productivity platform that combines GitLab integration, AI-powered insights, and real-time telemetry to help developers and teams optimize their workflow and productivity.
 # 🚀 DevX Tracker: The Future of Developer Productivity
 
 ## 🌟 Transform Your Development Team with AI-Powered Insights
@@ -209,6 +207,13 @@ DevX Tracker is revolutionizing how development teams work by combining cutting-
 - **Knowledge Base**: Comprehensive documentation and tutorials for all platform features.
 - **Training Resources**: Interactive training materials and certification programs.
 - **Regular Webinars**: Monthly webinars covering new features, best practices, and success stories.
+
+## 📞 Contact Us
+
+- **Email**: support@devxtracker.com
+- **Slack**: devxtracker.slack.com
+- **Twitter**: @DevXTracker
+- **LinkedIn**: DevX Tracker
 
 ## 🌍 Join the Revolution
 

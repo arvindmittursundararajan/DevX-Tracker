@@ -1,0 +1,345 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile & Telemetry - DevX Tracker{% endblock %}
+
+{% block head %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <!-- User Profile Card -->
+    <div class="row">
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-user-circle me-2 text-primary"></i>Developer Profile
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="profile-avatar mx-auto mb-3">
+                        <img src="{{ url_for('static', filename='img/' + current_user.photo) }}" alt="{{ current_user.name }}" class="profile-image" style="width: 120px; height: 120px;">
+                </div>
+                <h5 class="mb-1">{{ current_user.name }}</h5>
+                <p class="text-muted mb-1">{{ current_user.title }}</p>
+                <p class="text-muted small mb-3">{{ current_user.team }}</p>
+                
+                <div class="profile-stats row text-center">
+                    <div class="col-4">
+                        <div class="stat-value text-primary">{{ ((telemetry_data.daily_data[0].screen_time_hours if telemetry_data.daily_data else 8.5))|round(1) }}h</div>
+                        <div class="stat-label small">Daily Screen Time</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="stat-value text-success">{{ (telemetry_data.daily_data[0].focus_score if telemetry_data.daily_data else 85) }}%</div>
+                        <div class="stat-label small">Focus Score</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="stat-value text-warning">{{ (telemetry_data.daily_data[0].deep_work_hours if telemetry_data.daily_data else 4.2) }}h</div>
+                        <div class="stat-label small">Deep Work</div>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="profile-info text-start">
+                    <div class="info-item d-flex justify-content-between mb-2">
+                        <span class="text-muted">Email:</span>
+                        <span>{{ current_user.email }}</span>
+                    </div>
+                    <div class="info-item d-flex justify-content-between mb-2">
+                        <span class="text-muted">Join Date:</span>
+                        <span>{{ current_user.join_date }}</span>
+                    </div>
+                    <div class="info-item d-flex justify-content-between">
+                        <span class="text-muted">Last Sync:</span>
+                        <span class="small">{{ telemetry_data.last_sync }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Smartwatch Integration -->
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-heartbeat me-2 text-danger"></i>Health Metrics
+                </h5>
+                <span class="badge bg-success">
+                    <i class="fas fa-bluetooth me-1"></i>Connected
+                </span>
+            </div>
+            <div class="card-body">
+                <!-- Health Overview -->
+                <div class="health-overview mb-4">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <div class="health-metric p-3 bg-danger bg-opacity-10 rounded">
+                                <i class="fas fa-heartbeat fa-2x text-danger mb-2"></i>
+                                <div class="metric-value">{{ telemetry_data.health_data.heart_rate.avg }}</div>
+                                <div class="metric-label small">Avg BPM</div>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="health-metric p-3 bg-info bg-opacity-10 rounded">
+                                <i class="fas fa-brain fa-2x text-info mb-2"></i>
+                                <div class="metric-value">{{ telemetry_data.health_data.stress_level }}%</div>
+                                <div class="metric-label small">Stress Level</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="health-metric p-3 bg-primary bg-opacity-10 rounded">
+                                <i class="fas fa-bed fa-2x text-primary mb-2"></i>
+                                <div class="metric-value">{{ telemetry_data.health_data.sleep_hours }}h</div>
+                                <div class="metric-label small">Sleep</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="health-metric p-3 bg-success bg-opacity-10 rounded">
+                                <i class="fas fa-walking fa-2x text-success mb-2"></i>
+                                <div class="metric-value">{{ "{:,}".format(telemetry_data.health_data.steps) }}</div>
+                                <div class="metric-label small">Steps</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Health Details -->
+                <div class="health-details">
+                    <h6 class="mb-3">Detailed Health Data</h6>
+                    <div class="health-item d-flex justify-content-between mb-2">
+                        <span class="text-muted">Sleep Quality:</span>
+                        <span class="badge bg-success">{{ telemetry_data.health_data.sleep_quality }}%</span>
+                    </div>
+                    <div class="health-item d-flex justify-content-between mb-2">
+                        <span class="text-muted">Heart Rate Range:</span>
+                        <span>{{ telemetry_data.health_data.heart_rate.min }}-{{ telemetry_data.health_data.heart_rate.max }} BPM</span>
+                    </div>
+                    <div class="health-item d-flex justify-content-between mb-2">
+                        <span class="text-muted">Calories Burned:</span>
+                        <span>{{ "{:,}".format(telemetry_data.health_data.calories) }}</span>
+                    </div>
+                    <div class="health-item d-flex justify-content-between">
+                        <span class="text-muted">Active Minutes:</span>
+                        <span>{{ telemetry_data.health_data.active_minutes }} min</span>
+                    </div>
+                </div>
+                
+                <!-- Device Status -->
+                <div class="mt-4 p-3 bg-success bg-opacity-10 rounded">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-watch fa-lg text-success me-3"></i>
+                        <div>
+                            <div class="fw-medium">Apple Watch Series 9</div>
+                            <div class="small text-muted">Connected • Battery 78%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Productivity Insights -->
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line me-2 text-success"></i>Productivity Insights
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- Weekly Focus Trend -->
+                <div class="mb-4">
+                    <h6 class="mb-3">Focus Score Trend (7 Days)</h6>
+                    <div class="chart-container small-chart">
+                        <canvas id="focusChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Productivity Stats -->
+                <div class="productivity-stats">
+                    <div class="stat-item d-flex justify-content-between mb-3 p-2 bg-primary bg-opacity-10 rounded">
+                        <div>
+                            <div class="fw-medium">Most Productive Hours</div>
+                            <div class="small text-muted">Peak performance time</div>
+                        </div>
+                        <div class="text-end">
+                            {% for hour in telemetry_data.productivity_insights.most_productive_hours %}
+                            <div class="badge bg-primary small">{{ hour }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item d-flex justify-content-between mb-3 p-2 bg-warning bg-opacity-10 rounded">
+                        <div>
+                            <div class="fw-medium">Deep Work Percentage</div>
+                            <div class="small text-muted">Quality focus time</div>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-warning">{{ telemetry_data.productivity_insights.deep_work_percentage }}%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item d-flex justify-content-between mb-3 p-2 bg-info bg-opacity-10 rounded">
+                        <div>
+                            <div class="fw-medium">Meeting Time</div>
+                            <div class="small text-muted">Time in meetings</div>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-info">{{ telemetry_data.productivity_insights.meeting_time_percentage }}%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item d-flex justify-content-between p-2 bg-danger bg-opacity-10 rounded">
+                        <div>
+                            <div class="fw-medium">Distraction Score</div>
+                            <div class="small text-muted">Interruption frequency</div>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-danger">{{ telemetry_data.productivity_insights.distraction_score }}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Desktop App Usage Table -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-desktop me-2"></i>Desktop Application Usage
+                </h5>
+                <span class="badge bg-info">Last 24 Hours</span>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Application</th>
+                                <th>Category</th>
+                                <th>Time Used</th>
+                                <th>Productivity Impact</th>
+                                <th>Usage Pattern</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for app in telemetry_data.app_usage %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {% if app.app == 'VS Code' %}
+                                        <i class="fas fa-code text-primary me-2"></i>
+                                        {% elif app.app == 'GitLab' %}
+                                        <i class="fab fa-gitlab text-warning me-2"></i>
+                                        {% elif app.app == 'Chrome' %}
+                                        <i class="fab fa-chrome text-info me-2"></i>
+                                        {% elif app.app == 'Slack' %}
+                                        <i class="fab fa-slack text-success me-2"></i>
+                                        {% else %}
+                                        <i class="fas fa-desktop text-muted me-2"></i>
+                                        {% endif %}
+                                        <strong>{{ app.app }}</strong>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{% if app.category == 'Development' %}primary{% elif app.category == 'Communication' %}success{% elif app.category == 'Research' %}info{% else %}secondary{% endif %}">
+                                        {{ app.category }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <strong>{{ app.hours }}h</strong>
+                                    <div class="progress mt-1" style="height: 4px;">
+                                        <div class="progress-bar" style="width: {{ (app.hours / 8 * 100)|round(1) }}%"></div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if app.category == 'Development' %}
+                                    <span class="text-success"><i class="fas fa-arrow-up me-1"></i>High</span>
+                                    {% elif app.category == 'Communication' %}
+                                    <span class="text-warning"><i class="fas fa-minus me-1"></i>Medium</span>
+                                    {% else %}
+                                    <span class="text-info"><i class="fas fa-arrow-down me-1"></i>Variable</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <canvas id="sparkline-{{ loop.index }}" width="60" height="20"></canvas>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Screen Time Analytics -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-clock me-2"></i>Screen Time Analytics (7 Days)
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container medium-chart">
+                    <canvas id="screenTimeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- AI Recommendations -->
+    <div class="recommendations-section">
+        <h3>AI Recommendations</h3>
+        <div class="recommendations-list">
+            {% for recommendation in recommendations %}
+            <div class="recommendation-card">
+                <div class="recommendation-header">
+                    <h4>{{ recommendation.title }}</h4>
+                </div>
+                <p>{{ recommendation.description }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/telemetry.js') }}"></script>
+<script>
+// Initialize charts with telemetry data
+document.addEventListener('DOMContentLoaded', function() {
+    // Focus score trend
+    const focusData = {{ telemetry_data.daily_data|map(attribute='focus_score')|reverse|list|tojson }};
+    const focusLabels = {{ telemetry_data.daily_data|map(attribute='date')|reverse|list|tojson }};
+    initFocusChart(focusData, focusLabels);
+    
+    // Screen time chart
+    const screenTimeData = {{ telemetry_data.daily_data|map(attribute='screen_time_hours')|reverse|list|tojson }};
+    initScreenTimeChart(screenTimeData, focusLabels);
+    
+    // Initialize sparklines for app usage
+    initAppUsageSparklines();
+});
+</script>
+
+<style>
+    /* Remove audio-related styles */
+    .play-audio {
+        display: none;
+    }
+</style>
+{% endblock %}

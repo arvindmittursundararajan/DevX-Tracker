@@ -1,0 +1,1177 @@
+/* DevX Tracker Custom Styles */
+
+:root {
+    --primary: #0ea5e9;
+    --primary-light: rgba(14, 165, 233, 0.1);
+    --secondary: #64748b;
+    --accent: #3b82f6;
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #06b6d4;
+    --dark: #1e293b;
+    --surface: #0f172a;
+    --text-primary: #f8fafc;
+    --text-muted: #94a3b8;
+    --border: #334155;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Global Styles */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #0f172a;
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+/* Navigation */
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.nav-link.active {
+    background-color: rgba(14, 165, 233, 0.1);
+    border-radius: 0.375rem;
+}
+
+/* Cards */
+.card {
+    background: linear-gradient(135deg, var(--dark), rgba(14, 165, 233, 0.05));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--surface), rgba(14, 165, 233, 0.1));
+    border-bottom: 1px solid var(--border);
+}
+
+/* Metrics */
+.metric-card {
+    background: linear-gradient(135deg, var(--dark), rgba(14, 165, 233, 0.08));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.metric-card::before {
+    display: none;
+}
+
+.metric-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.metric-label {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Progress Bars */
+.progress {
+    background: linear-gradient(90deg, rgba(14, 165, 233, 0.1), rgba(59, 130, 246, 0.1));
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    transition: width 0.3s ease;
+}
+
+.progress-bar::after {
+    display: none;
+}
+
+/* Chart Container Styles - Fix Infinite Expansion */
+.chart-container {
+    position: relative;
+    height: 300px !important;
+    width: 100% !important;
+    max-height: 300px !important;
+    min-height: 200px !important;
+    overflow: hidden;
+    display: block;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.05), rgba(59, 130, 246, 0.05));
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.chart-container canvas {
+    max-height: 300px !important;
+    max-width: 100% !important;
+    height: 300px !important;
+    width: 100% !important;
+}
+
+/* Specific chart size constraints */
+canvas {
+    max-height: 400px !important;
+    height: auto !important;
+}
+
+#weeklyChart {
+    max-height: 200px !important;
+    height: 200px !important;
+}
+
+#languageChart {
+    max-height: 300px !important;
+    height: 300px !important;
+}
+
+#focusChart,
+#screenTimeChart {
+    max-height: 250px !important;
+    height: 250px !important;
+}
+
+.small-chart {
+    height: 200px !important;
+    max-height: 200px !important;
+}
+
+.medium-chart {
+    height: 350px !important;
+    max-height: 350px !important;
+}
+
+.large-chart {
+    height: 400px !important;
+    max-height: 400px !important;
+}
+
+/* Dashboard Layout */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.5rem;
+    height: calc(100vh - 200px);
+}
+
+.dashboard-panel {
+    min-height: 500px;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+/* GitLab Data Tables */
+.gitlab-table {
+    font-size: 0.875rem;
+}
+
+.gitlab-table th {
+    background: linear-gradient(135deg, var(--surface), rgba(14, 165, 233, 0.1));
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.75rem;
+}
+
+.gitlab-table td {
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.status-badge {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(59, 130, 246, 0.1));
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.status-success {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.status-failed {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+}
+
+.status-running {
+    background-color: rgba(6, 182, 212, 0.1);
+    color: var(--info);
+}
+
+.status-pending {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+}
+
+.progress-value {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+/* Activity Feed */
+.activity-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.activity-item {
+    background: linear-gradient(90deg, transparent, rgba(14, 165, 233, 0.05));
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-item::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 1px;
+    background: var(--primary);
+    transition: width 0.2s ease;
+}
+
+.activity-item:hover::after {
+    width: 100%;
+}
+
+.activity-text {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.activity-time {
+    color: var(--text-muted);
+}
+
+/* Recommendations */
+.recommendation-card {
+    background: linear-gradient(135deg, var(--dark), rgba(14, 165, 233, 0.08));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.recommendation-card::before {
+    display: none;
+}
+
+.recommendation-icon {
+    width: 40px;
+    flex-shrink: 0;
+}
+
+/* Achievements */
+.level-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 16px rgba(14, 165, 233, 0.3);
+}
+
+.level-number {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: white;
+}
+
+.achievement-item {
+    background: linear-gradient(90deg, transparent, rgba(14, 165, 233, 0.05));
+    transition: all 0.3s ease;
+    position: relative;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+.achievement-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 3px;
+    height: 0;
+    background: var(--success);
+    transition: height 0.3s ease;
+}
+
+.achievement-item:hover::before {
+    height: 100%;
+}
+
+.achievements-grid {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.badge-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.badge-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+/* Health Metrics */
+.health-metric {
+    background: linear-gradient(135deg, var(--dark), rgba(14, 165, 233, 0.08));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.health-metric:hover {
+    transform: scale(1.05);
+}
+
+.health-overview .metric-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+/* Profile */
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--info));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.profile-stats .stat-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.profile-stats .stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Tables */
+.table-dark {
+    --bs-table-bg: var(--dark);
+    --bs-table-border-color: var(--border);
+}
+
+.table > tbody > tr {
+    background: linear-gradient(90deg, transparent, rgba(14, 165, 233, 0.02));
+    transition: background 0.2s, transform 0.2s cubic-bezier(.4,0,.2,1);
+}
+
+.table > tbody > tr:hover {
+    background: rgba(14, 165, 233, 0.05);
+    transform: none;
+}
+
+/* Chart Containers */
+.chart-container {
+    position: relative;
+    height: 200px;
+    margin-bottom: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .metric-display {
+        text-align: center;
+    }
+    
+    .metric-display > div {
+        margin-bottom: 1rem;
+    }
+    
+    .level-circle {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .level-number {
+        font-size: 1.25rem;
+    }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--surface);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--text-muted);
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
+
+/* Animation Classes */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.slide-in {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Loading States */
+.loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.loading::after {
+    display: none;
+}
+
+/* Status Indicators */
+.status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+.status-online {
+    background-color: var(--success);
+    animation: none;
+}
+
+.status-offline {
+    background-color: var(--text-muted);
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+/* Toast Notifications */
+.toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 9999;
+}
+
+/* Admin Specific Styles */
+.avatar-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--info));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.insight-card {
+    height: 100%;
+}
+
+.metric-grid .metric-item {
+    font-size: 0.875rem;
+}
+
+/* Form Styles */
+.form-control {
+    background: linear-gradient(135deg, var(--dark), rgba(14, 165, 233, 0.05));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus {
+    background: linear-gradient(135deg, var(--dark), rgba(14, 165, 233, 0.08));
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    border: none;
+    transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+    transform: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Footer */
+.footer {
+    background: linear-gradient(135deg, var(--dark), rgba(14, 165, 233, 0.05)) !important;
+    border-top: 1px solid var(--border);
+    margin-top: auto;
+}
+
+/* --- Subtle Slick UI Enhancements --- */
+
+.card, .metric-card, .badge-card, .achievement-item, .health-metric {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover, .metric-card:hover, .badge-card:hover, .achievement-item:hover, .health-metric:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:active, .btn-primary:focus {
+    transform: scale(0.97);
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.15);
+    outline: none;
+}
+
+.table > tbody > tr {
+    transition: background 0.2s, transform 0.2s cubic-bezier(.4,0,.2,1);
+}
+
+.table > tbody > tr:hover {
+    background: rgba(14, 165, 233, 0.05);
+    transform: none;
+}
+
+/* Subtle spinner for loading states */
+.slick-spinner {
+    display: none;
+}
+
+/* Fade-in and slide-in for main content containers */
+.main-content, .dashboard-panel, .dashboard-grid, .telemetry-section, .admin-section {
+    animation: none;
+}
+
+/* Only fade in on first load, not on every render */
+.main-content.loaded, .dashboard-panel.loaded, .dashboard-grid.loaded, .telemetry-section.loaded, .admin-section.loaded {
+    opacity: 1;
+}
+
+/* Enhanced Recommendations */
+.recommendation-card {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.recommendation-card::before {
+    display: none;
+}
+
+/* Enhanced Achievements */
+.achievement-item {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.achievement-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 3px;
+    height: 0;
+    background: var(--success);
+    transition: height 0.3s ease;
+}
+
+.achievement-item:hover::before {
+    height: 100%;
+}
+
+/* Enhanced Navigation */
+.nav-link {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--primary);
+    transition: width 0.2s ease;
+    transform: translateX(-50%);
+}
+
+.nav-link:hover::after {
+    width: 100%;
+}
+
+/* Enhanced Dropdown */
+.dropdown-menu {
+    transition: opacity 0.2s ease;
+    transform: none;
+}
+
+.dropdown-menu.show {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Enhanced Alerts */
+.alert {
+    transition: opacity 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.alert::before {
+    display: none;
+}
+
+.alert:hover::before {
+    transform: translateX(100%);
+}
+
+/* Enhanced Loading States */
+.loading::after {
+    display: none;
+}
+
+/* Enhanced Scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--surface);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--text-muted);
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
+
+/* Enhanced Focus States */
+:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.3);
+    transition: box-shadow 0.3s ease;
+}
+
+/* Enhanced Hover States */
+[data-hover] {
+    transition: all 0.3s ease;
+}
+
+[data-hover]:hover {
+    transform: none;
+}
+
+/* Enhanced Transitions */
+.fade-enter {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.fade-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-exit {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.fade-exit-active {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Enhanced Tooltips */
+[data-tooltip] {
+    position: relative;
+}
+
+[data-tooltip]::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) scale(0.9);
+    padding: 4px 8px;
+    background: var(--dark);
+    color: var(--text-primary);
+    font-size: 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+[data-tooltip]:hover::before {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+}
+
+/* Enhanced Modal Animations */
+.modal.fade .modal-dialog {
+    transition: none;
+}
+
+.modal.show .modal-dialog {
+    transform: scale(1);
+}
+
+/* Enhanced Form Controls */
+.form-control {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(14, 165, 233, 0.25);
+}
+
+/* Enhanced Tabs */
+.nav-tabs .nav-link {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.nav-tabs .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--primary);
+    transition: width 0.2s ease;
+}
+
+.nav-tabs .nav-link.active::after {
+    width: 100%;
+}
+
+/* Enhanced Cards with Hover Effects */
+.card-hover {
+    transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Enhanced Icons */
+.icon-hover {
+    transition: all 0.3s ease;
+}
+
+.icon-hover:hover {
+    transform: scale(1.2);
+    color: var(--primary);
+}
+
+/* Enhanced Lists */
+.list-hover li {
+    transition: all 0.3s ease;
+    position: relative;
+    padding-left: 20px;
+}
+
+.list-hover li::before {
+    display: none;
+}
+
+.list-hover li:hover {
+    transform: none;
+}
+
+/* Enhanced Grid Items */
+.grid-item {
+    transition: all 0.3s ease;
+}
+
+.grid-item:hover {
+    transform: none;
+}
+
+/* Enhanced Text Effects */
+.text-gradient {
+    background: linear-gradient(45deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: none;
+}
+
+.text-gradient:hover {
+    background: linear-gradient(45deg, var(--accent), var(--primary));
+    -webkit-background-clip: text;
+}
+
+/* Enhanced Background Effects */
+.bg-gradient {
+    background: linear-gradient(135deg, var(--surface), var(--dark));
+    transition: none;
+}
+
+.bg-gradient:hover {
+    background: linear-gradient(135deg, var(--dark), var(--surface));
+}
+
+/* Enhanced Border Effects */
+.border-hover {
+    transition: border-color 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.border-hover:hover {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 1px var(--primary);
+}
+
+/* Enhanced Shadow Effects */
+.shadow-hover {
+    transition: none;
+}
+
+.shadow-hover:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Enhanced Image Effects */
+.img-hover {
+    transition: none;
+}
+
+.img-hover:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+/* Enhanced Button Groups */
+.btn-group .btn {
+    transition: background-color 0.2s ease;
+}
+
+.btn-group .btn:hover {
+    z-index: 1;
+}
+
+/* Enhanced Dropdown Items */
+.dropdown-item {
+    transition: background-color 0.2s ease;
+}
+
+.dropdown-item:hover {
+    transform: none;
+}
+
+/* Enhanced Pagination */
+.page-link {
+    transition: background-color 0.2s ease;
+}
+
+.page-link:hover {
+    transform: none;
+}
+
+/* Enhanced Breadcrumbs */
+.breadcrumb-item {
+    transition: color 0.2s ease;
+}
+
+.breadcrumb-item:hover {
+    color: var(--primary);
+}
+
+/* Enhanced Progress Steps */
+.progress-step {
+    transition: none;
+}
+
+.progress-step.active {
+    transform: scale(1.1);
+}
+
+/* Enhanced Timeline */
+.timeline-item {
+    transition: all 0.3s ease;
+}
+
+.timeline-item:hover {
+    transform: none;
+}
+
+/* Enhanced Cards with Ribbon */
+.card-ribbon {
+    position: relative;
+    overflow: hidden;
+}
+
+.card-ribbon::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 50px 50px 0;
+    border-color: transparent var(--primary) transparent transparent;
+    transition: none;
+}
+
+.card-ribbon:hover::before {
+    border-width: 0 60px 60px 0;
+}
+
+/* Enhanced Loading Spinner */
+.spinner {
+    animation: none;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Enhanced Tooltip Arrow */
+[data-tooltip]::after {
+    content: '';
+    position: absolute;
+    bottom: calc(100% - 5px);
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 10px;
+    height: 10px;
+    background: var(--dark);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+[data-tooltip]:hover::after {
+    opacity: 1;
+}
+
+/* Enhanced Modal Backdrop */
+.modal-backdrop {
+    transition: opacity 0.2s ease;
+}
+
+/* Enhanced Form Validation */
+.form-control.is-valid {
+    border-color: var(--success);
+    background-image: none;
+    transition: border-color 0.2s ease;
+}
+
+.form-control.is-invalid {
+    border-color: var(--danger);
+    background-image: none;
+    transition: border-color 0.2s ease;
+}
+
+/* Enhanced Table Sorting */
+.sortable {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.sortable:hover {
+    background: rgba(14, 165, 233, 0.1);
+}
+
+/* Enhanced Chart Tooltips */
+.chart-tooltip {
+    transition: opacity 0.2s ease;
+    transform: translateY(5px);
+    opacity: 0;
+}
+
+.chart-tooltip.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* Enhanced Responsive Images */
+.img-fluid {
+    transition: none;
+}
+
+.img-fluid:hover {
+    transform: none;
+}
+
+/* Enhanced Code Blocks */
+pre {
+    transition: none;
+}
+
+pre:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Enhanced Blockquotes */
+blockquote {
+    transition: none;
+    border-left: 4px solid var(--primary);
+}
+
+blockquote:hover {
+    transform: none;
+    background: rgba(14, 165, 233, 0.05);
+}
+
+/* Enhanced Definition Lists */
+dl {
+    transition: none;
+}
+
+dl:hover dt {
+    color: var(--primary);
+}
+
+/* Enhanced Horizontal Rules */
+hr {
+    transition: none;
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+}
+
+hr:hover {
+    height: 2px;
+    background: var(--primary);
+}
+
+/* Enhanced Selection */
+::selection {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: white;
+}
+
+/* Enhanced Focus Ring */
+:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.3);
+    background: linear-gradient(135deg, var(--dark), rgba(14, 165, 233, 0.08));
+}
+
+/* Enhanced Print Styles */
+@media print {
+    .no-print {
+        display: none;
+    }
+    
+    .print-only {
+        display: block;
+    }
+}
+
+/* Enhanced Dark Mode */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --surface: #0f172a;
+        --dark: #1e293b;
+    }
+    
+    .card, .metric-card, .health-metric {
+        background: linear-gradient(135deg, var(--dark), rgba(14, 165, 233, 0.05));
+    }
+}
+
+/* Enhanced Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
